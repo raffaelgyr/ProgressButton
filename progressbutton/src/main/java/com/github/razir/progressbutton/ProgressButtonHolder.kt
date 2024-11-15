@@ -17,7 +17,7 @@ internal val activeViews = WeakHashMap<TextView, DrawableViewData>()
 /**
  * Binds your buttons to component lifecycle for the correct data recycling
  * This method is required for all buttons that show progress/drawable
- * @receiver lifecycle owner to which to bin (eg. Activity, Fragment or other)
+ * @receiver lifecycle owner to which to bind (eg. Activity, Fragment or other)
  * @param button button instance to bind
  */
 fun LifecycleOwner.bindProgressButton(button: TextView) {
