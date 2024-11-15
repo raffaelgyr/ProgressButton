@@ -255,7 +255,7 @@ private fun getDrawableSpannable(
     }
 }
 
-internal data class DrawableViewData(var drawable: Drawable, val callback: Drawable.Callback)
+internal data class DrawableViewData(val drawable: Drawable, val callback: Drawable.Callback)
 
 private const val DEFAULT_DRAWABLE_MARGIN_DP = 10f
 
