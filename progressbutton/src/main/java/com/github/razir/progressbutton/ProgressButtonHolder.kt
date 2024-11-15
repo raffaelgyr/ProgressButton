@@ -27,7 +27,7 @@ fun LifecycleOwner.bindProgressButton(button: TextView) {
 fun TextView.cleanUpDrawable() {
     if (activeViews.containsKey(this)) {
         activeViews[this]?.drawable?.apply {
-            if (this is Animatable && drawable.isRunning) {
+            if (this is Animatable && isRunning) {
                 stop()
             }
             callback = null
@@ -83,7 +83,7 @@ private val drawablesAttachListener = object : View.OnAttachStateChangeListener 
     override fun onViewDetachedFromWindow(v: View?) {
         if (activeViews.containsKey(v)) {
             activeViews[v]?.drawable?.apply {
-                if (this is Animatable && drawable.isRunning) {
+                if (this is Animatable && isRunning) {
                     stop()
                 }
             }
@@ -93,7 +93,7 @@ private val drawablesAttachListener = object : View.OnAttachStateChangeListener 
     override fun onViewAttachedToWindow(v: View?) {
         if (activeViews.containsKey(v)) {
             activeViews[v]?.drawable?.apply {
-                if (this is Animatable && !drawable.isRunning) {
+                if (this is Animatable && !isRunning) {
                     start()
                 }
             }
