@@ -7,6 +7,7 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.util.TypedValue
 import android.widget.TextView
+import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
 import androidx.appcompat.text.AllCapsTransformationMethod
 import androidx.core.content.ContextCompat
@@ -126,11 +127,19 @@ internal fun TextView.showProgress(params: ProgressParams) {
             progressColorRes != null -> intArrayOf(ContextCompat.getColor(context, progressColorRes!!))
             progressColor != null -> intArrayOf(progressColor!!)
             progressColors != null -> progressColors!!
-            else -> intArrayOf()
+            else -> getSuitableTextColor() ?: intArrayOf()
         }
         val progressDrawable = generateProgressDrawable(context, colors, progressRadiusValue, progressStrokeValue)
         showDrawable(progressDrawable, params)
     }
+}
+
+@ColorInt
+private fun TextView.getSuitableTextColor(): IntArray? {
+	val textColors = textColors ?: return null
+	return intArrayOf(
+		textColors.getColorForState(intArrayOf(android.R.attr.state_enabled), textColors.defaultColor)
+	)
 }
 
 /*
