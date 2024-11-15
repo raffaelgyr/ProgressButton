@@ -24,15 +24,19 @@ fun LifecycleOwner.bindProgressButton(button: TextView) {
     lifecycle.addObserver(ProgressButtonHolder(WeakReference(button)))
 }
 
-fun TextView.cleanUpDrawable() {
-    if (activeViews.containsKey(this)) {
-        activeViews[this]?.drawable?.apply {
-            if (this is Animatable && isRunning) {
-                stop()
+fun TextView.cleanUpDrawable(): String? {
+    return if (activeViews.containsKey(this)) {
+        val drawableViewData = activeViews[this]
+        if (drawableViewData != null) {
+            if (drawableViewData.drawable is Animatable && drawableViewData.drawable.isRunning) {
+                drawableViewData.drawable.stop()
             }
-            callback = null
+            drawableViewData.drawable.callback = null
         }
         activeViews.remove(this)
+        drawableViewData?.previousText
+    } else {
+        null
     }
 }
 

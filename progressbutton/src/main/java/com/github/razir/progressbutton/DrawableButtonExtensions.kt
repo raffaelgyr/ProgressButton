@@ -95,11 +95,11 @@ fun TextView.hideProgress(@StringRes newTextRes: Int) = hideDrawable(newTextRes)
  */
 @JvmOverloads
 fun TextView.hideDrawable(newText: String? = null) {
-    cleanUpDrawable()
+    val previousText = cleanUpDrawable()
     if (isAnimatorAttached()) {
-        animateTextChange(newText)
+        animateTextChange(newText ?: previousText ?: this.text?.toString())
     } else {
-        this.text = newText
+        this.text = newText ?: previousText ?: this.text?.toString()
     }
 }
 
@@ -155,8 +155,10 @@ private fun TextView.showDrawable(
     gravity: Int,
     textMarginPx: Int
 ) {
-    if (isDrawableActive()) {
-        cleanUpDrawable()
+    val previousText = if (isDrawableActive()) {
+        cleanUpDrawable() ?: this.text?.toString()
+    } else {
+        this.text?.toString()
     }
     // Workaround to check if textAllCaps==true on any android api version
     if (transformationMethod?.javaClass?.name == "android.text.method.AllCapsTransformationMethod" ||
@@ -171,7 +173,7 @@ private fun TextView.showDrawable(
         textMarginPx
     }
     val animatorAttached = isAnimatorAttached()
-    val newText = getDrawableSpannable(drawable, text, gravity, drawableMargin, animatorAttached)
+    val newText = getDrawableSpannable(drawable, text, previousText, gravity, drawableMargin, animatorAttached)
     if (animatorAttached) {
         animateTextChange(newText)
     } else {
@@ -179,10 +181,10 @@ private fun TextView.showDrawable(
     }
 
     addDrawableAttachViewListener()
-    setupDrawableCallback(this, drawable)
+    setupDrawableCallback(this, drawable, previousText)
 }
 
-private fun setupDrawableCallback(textView: TextView, drawable: Drawable) {
+private fun setupDrawableCallback(textView: TextView, drawable: Drawable, previousText: String?) {
     val callback = object : Drawable.Callback {
         override fun unscheduleDrawable(who: Drawable, what: Runnable) {
         }
@@ -194,7 +196,7 @@ private fun setupDrawableCallback(textView: TextView, drawable: Drawable) {
         override fun scheduleDrawable(who: Drawable, what: Runnable, `when`: Long) {
         }
     }
-    activeViews[textView] = DrawableViewData(drawable, callback)
+    activeViews[textView] = DrawableViewData(drawable, previousText, callback)
     drawable.callback = callback
     if (drawable is Animatable && !drawable.isRunning) {
         drawable.start()
@@ -228,6 +230,7 @@ private fun generateProgressDrawable(
 private fun getDrawableSpannable(
     drawable: Drawable,
     text: String?,
+    previousText: String?,
     gravity: Int,
     drawableMarginPx: Int,
     useTextAlpha: Boolean
@@ -236,13 +239,13 @@ private fun getDrawableSpannable(
     return when (gravity) {
         DrawableButton.GRAVITY_TEXT_START -> {
             drawableSpan.paddingEnd = drawableMarginPx
-            SpannableString(" ${text ?: ""}").apply {
+            SpannableString(" ${text ?: previousText ?: ""}").apply {
                 setSpan(drawableSpan, 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             }
         }
         DrawableButton.GRAVITY_TEXT_END -> {
             drawableSpan.paddingStart = drawableMarginPx
-            SpannableString("${text ?: ""} ").apply {
+            SpannableString("${text ?: previousText ?: ""} ").apply {
                 setSpan(drawableSpan, length - 1, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             }
         }
@@ -255,7 +258,7 @@ private fun getDrawableSpannable(
     }
 }
 
-internal data class DrawableViewData(val drawable: Drawable, val callback: Drawable.Callback)
+internal data class DrawableViewData(val drawable: Drawable, val previousText: String?, val callback: Drawable.Callback)
 
 private const val DEFAULT_DRAWABLE_MARGIN_DP = 10f
 
